@@ -7,13 +7,13 @@ body {
     padding-left: 30px;
   }
   
-  .tablero-row:after {
+  .tablero-fila:after {
     clear: both;
     content: "";
     display: table;
   }
   
-  .status {
+  .estado {
     margin-bottom: 10px;
   }
   

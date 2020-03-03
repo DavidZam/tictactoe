@@ -3,15 +3,75 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
   class Juego extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        historial: [{
+          celdas: Array(9).fill(null),
+        }],
+        pasoNumero: 0,
+        tocaX: true,
+      };
+    }
+
+    handleClick(i) {
+      const historial = this.state.historial.slice(0, this.state.pasoNumero + 1);
+      const actual = historial[historial.length - 1];
+      const celdas = actual.celdas.slice();
+      if (calculaGanador(celdas) || celdas[i]) {
+        return;
+      }
+      celdas[i] = this.state.tocaX ? 'X' : 'O';
+      this.setState({
+        historial: historial.concat([{
+          celdas: celdas,
+        }]),        
+        pasoNumero: historial.length,
+        tocaX: !this.state.tocaX
+      });
+    }
+
+    saltarA(paso) {
+      this.setState({
+        pasoNumero: paso,
+        tocaX: (paso % 2) === 0
+      });
+    }
+
     render() {
+      const historial = this.state.historial;
+      const actual = historial[this.state.pasoNumero];
+      const ganador = calculaGanador(actual.celdas);
+
+      const movimientos = historial.map((paso, movimiento) => {
+        const desc = movimiento ?
+          'Ir al ' + movimiento + 'º movimiento ()' :
+          'Ir al inicio del juego';
+        return (
+          <li key={paso}>
+            <button onClick={() => this.saltarA(movimiento)}>{desc}</button>
+          </li>
+        )
+      });
+
+      let estado;
+      if (ganador) {
+        estado = 'Ganador ' + ganador;
+      } else {
+        estado = 'Siguiente jugador: ' + (this.state.tocaX ? 'X' : 'O');
+      }
+      
       return (
         <div className="juego">
           <div className="juego-tablero">
-            <Tablero />
+            <Tablero 
+              celdas={actual.celdas}
+              onClick={(i) => this.handleClick(i)}
+            />
           </div>
           <div className="juego-info">
-            <div>{/* status */}</div>
-            <ol>{/* TODO */}</ol>
+            <div>{estado}</div>
+            <ol>{movimientos}</ol>
           </div>
         </div>
       );
@@ -19,58 +79,29 @@ import './index.css';
   }
 
   class Tablero extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-        celdas: Array(9).fill(null),
-        tocaX: true,
-      };
-    }
-
-    handleClick(i) {
-      const celdas = this.state.celdas.slice();
-      if (calculaGanador(celdas) || celdas[i]) {
-        return;
-      }
-      celdas[i] = this.state.tocaX ? 'X' : 'O';
-      this.setState({
-        celdas: celdas,
-        tocaX: !this.state.tocaX
-      });
-    }
-
     renderCelda(i) {
       return (
         <Celda 
-          value={this.state.celdas[i]}
-          onClick={() => this.handleClick(i)}
+          value={this.props.celdas[i]}
+          onClick={() => this.props.onClick(i)}
         />
       );
     }
   
     render() {
-      const ganador = calculaGanador(this.state.celdas);
-      let status;
-      if (ganador) {
-        status = 'Ganador ' + ganador;
-      } else {
-        status = 'Siguiente jugador: ' + (this.state.tocaX ? 'X' : 'O');
-      }
-  
       return (
         <div>
-          <div className="status">{status}</div>
-          <div className="tablero-row">
+          <div className="tablero-fila">
             {this.renderCelda(0)}
             {this.renderCelda(1)}
             {this.renderCelda(2)}
           </div>
-          <div className="tablero-row">
+          <div className="tablero-fila">
             {this.renderCelda(3)}
             {this.renderCelda(4)}
             {this.renderCelda(5)}
           </div>
-          <div className="tablero-row">
+          <div className="tablero-fila">
             {this.renderCelda(6)}
             {this.renderCelda(7)}
             {this.renderCelda(8)}
