@@ -14,30 +14,39 @@ import './index.css';
     renderCelda(i, columna, fila) {
       return (
         <Celda 
+          key={i}
           value={this.props.celdas[i]}
           onClick={() => this.props.onClick(i, columna, fila)}
         />
       );
     }
+
+    crearTablero = () => {
+      let fila = [];
+      // Bucle exterior para crear la fila
+      for(let i = 0; i < 3; i++) {
+        let celda = [];
+        // Bucle interior para crear la celda
+        for(let j = 0; j < 3; j++) {
+          celda.push(
+            this.renderCelda(j + (i * 3), j + 1, i + 1)
+          )
+          console.log(j + (i * 3), j + 1, i + 1);
+          // Creamos el tablero y añadimos la fila
+        }
+        fila.push(
+          <div className="tablero-fila">
+            {celda}
+          </div>
+        )
+      }
+      return fila;
+    }
   
     render() {
       return (
         <div>
-          <div className="tablero-fila">
-            {this.renderCelda(0, 1, 1)}
-            {this.renderCelda(1, 2, 1)}
-            {this.renderCelda(2, 3, 1)}
-          </div>
-          <div className="tablero-fila">
-            {this.renderCelda(3, 1, 2)}
-            {this.renderCelda(4, 2, 2)}
-            {this.renderCelda(5, 3, 2)}
-          </div>
-          <div className="tablero-fila">
-            {this.renderCelda(6, 1, 3)}
-            {this.renderCelda(7, 2, 3)}
-            {this.renderCelda(8, 3, 3)}
-          </div>
+          {this.crearTablero()}
         </div>
       );
     }
@@ -87,10 +96,11 @@ import './index.css';
     }
 
     saltarA(paso) {
+      const nuevoHistorial = this.state.historial.slice(0, paso + 1);
+      const nuevasCoordenadas = this.state.coordenadas.slice(0, paso + 1);
       this.setState({
-        // REVISAR
-        // historial: this.state.historial.slice(paso + 1, this.state.historial.length - 1),
-        // coordenadas: this.state.coordenadas.slice(paso + 1, this.state.coordenadas.length - 1),
+        historial: nuevoHistorial,
+        coordenadas: nuevasCoordenadas,
         pasoNumero: paso,
         tocaX: (paso % 2) === 0
       });
@@ -109,11 +119,20 @@ import './index.css';
           'Ir al ' + movimiento + 'º movimiento ' + '(' +
           coordenadaActual.filas[movimiento - 1] + ',' + coordenadaActual.columnas[movimiento - 1] + ')':
           'Ir al inicio del juego';
-        return (
-          <li key={paso}>
-            <button onClick={() => this.saltarA(movimiento)}>{desc}</button>
-          </li>
-        )
+        // Comprobamos si es el ultimo movimiento
+        if (movimiento === historial.length - 1) { // Si no es el ultimo pintamos el boton en negrita
+          return (
+            <li key={paso} className="bold">
+              <button className="bold" onClick={() => this.saltarA(movimiento)}>{desc}</button>
+            </li>
+          )
+        } else { // Si no es el ultimo pintamos el boton normal
+          return (
+            <li key={paso}>
+              <button onClick={() => this.saltarA(movimiento)}>{desc}</button>
+            </li>
+          )
+        }
       });
 
       let estado;
@@ -129,7 +148,6 @@ import './index.css';
             <Tablero 
               celdas={actual.celdas}
               onClick={(i, columna, fila) => this.handleClick(i, columna, fila)}
-
             />
           </div>
           <div className="juego-info">
