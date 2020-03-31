@@ -6,6 +6,7 @@ import './index.css';
     return (
       <button className="celda" onClick={props.onClick}>
         {props.value}
+        {/* {props.celdaGanadora} */}
       </button>
     );
   }
@@ -16,6 +17,8 @@ import './index.css';
         <Celda 
           key={i}
           value={this.props.celdas[i]}
+          color={null}
+          // celdaGanadora={false}
           onClick={() => this.props.onClick(i, columna, fila)}
         />
       );
@@ -31,11 +34,10 @@ import './index.css';
           celda.push(
             this.renderCelda(j + (i * 3), j + 1, i + 1)
           )
-          console.log(j + (i * 3), j + 1, i + 1);
           // Creamos el tablero y añadimos la fila
         }
         fila.push(
-          <div className="tablero-fila">
+          <div key={i} className="tablero-fila">
             {celda}
           </div>
         )
@@ -45,7 +47,26 @@ import './index.css';
   
     render() {
       return (
-        <div>
+        // <div>
+        //   <div className="tablero-fila">
+        //     {this.renderCelda(0)}
+        //     {this.renderCelda(1)}
+        //     {this.renderCelda(2)}
+        //   </div>
+        //   <div className="tablero-fila">
+        //     {this.renderCelda(3)}
+        //     {this.renderCelda(4)}
+        //     {this.renderCelda(5)}
+        //   </div>
+        //   <div className="tablero-fila">
+        //     {this.renderCelda(6)}
+        //     {this.renderCelda(7)}
+        //     {this.renderCelda(8)}
+        //   </div>
+        // </div>
+
+        // Resultado tras generar el tablero con dos bucles for
+        <div className="ml-3 mb-3">
           {this.crearTablero()}
         </div>
       );
@@ -57,7 +78,7 @@ import './index.css';
       super(props);
       this.state = {
         historial: [{
-          celdas: Array(9).fill(null)
+          celdas: Array(9).fill(null),
         }],
         coordenadas: [{
             filas: Array(1).fill(null),
@@ -65,7 +86,39 @@ import './index.css';
         }],
         pasoNumero: 0,
         tocaX: true,
+        historialOrdenAscendente: true,
+        textoOrden: 'ascendente'
       };
+    }
+
+    cambiarOrden() {
+      // Obtenemos el historial del state de Juego
+      // let historial = this.state.historial;
+      // // Hacemos un reverse del historial guardado en el state
+      // historial = this.state.historial.reverse();
+      // // Eliminamos el ultimo elemento del historial
+      // historial.pop();
+      // // Creamos un array de celdas con 9 posiciones nulas
+      // const celdas = new Array(9).fill(null);
+      // const elementoVacio = { celdas };
+      // // Añadimos el nuevo array vacio celdas a partir del índice historial.length
+      // historial[historial.length] = elementoVacio;
+
+      // this.state.historialOrdenAscendente = !this.state.historialOrdenAscendente;
+      let textoOrden;
+      let historialOrdenAscendente = !this.state.historialOrdenAscendente;
+      if (historialOrdenAscendente) {
+        textoOrden = 'ascendente';
+      } else {
+        textoOrden = 'descendente';
+      }
+
+      // Cambiamos el estado para indicar que se ordena de manera distina
+      this.setState({
+        // historial: historial,
+        historialOrdenAscendente: historialOrdenAscendente,
+        textoOrden: textoOrden
+      });
     }
 
     handleClick(i, columnaClickada, filaClickada) {
@@ -112,9 +165,13 @@ import './index.css';
       
       const actual = historial[this.state.pasoNumero];
       const coordenadaActual = coordenadas[this.state.pasoNumero];
-      const ganador = calculaGanador(actual.celdas);
 
+      const ganador = calculaGanador(actual.celdas);
+      
       const movimientos = historial.map((paso, movimiento) => {
+        if(!this.state.historialOrdenAscendente) {
+          movimiento = this.state.pasoNumero - movimiento;
+        }
         const desc = movimiento ?
           'Ir al ' + movimiento + 'º movimiento ' + '(' +
           coordenadaActual.filas[movimiento - 1] + ',' + coordenadaActual.columnas[movimiento - 1] + ')':
@@ -122,13 +179,13 @@ import './index.css';
         // Comprobamos si es el ultimo movimiento
         if (movimiento === historial.length - 1) { // Si no es el ultimo pintamos el boton en negrita
           return (
-            <li key={paso} className="bold">
+            <li key={movimiento} className="bold">
               <button className="bold" onClick={() => this.saltarA(movimiento)}>{desc}</button>
             </li>
           )
         } else { // Si no es el ultimo pintamos el boton normal
           return (
-            <li key={paso}>
+            <li key={movimiento}>
               <button onClick={() => this.saltarA(movimiento)}>{desc}</button>
             </li>
           )
@@ -149,9 +206,10 @@ import './index.css';
               celdas={actual.celdas}
               onClick={(i, columna, fila) => this.handleClick(i, columna, fila)}
             />
+            <div>{estado}</div>
           </div>
           <div className="juego-info">
-            <div>{estado}</div>
+          <button onClick={() => this.cambiarOrden()}>Cambiar orden (actual: {this.state.textoOrden})</button>
             <ol>{movimientos}</ol>
           </div>
         </div>
@@ -173,6 +231,14 @@ import './index.css';
     for (let i = 0; i < lineas.length; i++) {
       const [a, b, c] = lineas[i];
       if (celdas[a] && celdas[a] === celdas[b] && celdas[a] === celdas[c]) {
+        // celdas[a].celdaGanadora = true;
+        // celdas[b].celdaGanadora = true;
+        // celdas[c].celdaGanadora = true;
+        // this.setState({
+        //     historial: historial.concat([{
+        //       celdas: celdas
+        //     }]) 
+        // });
         return celdas[a];
       }
     }

@@ -14,6 +14,14 @@ body {
   .bold {
     font-weight: bold;
   }
+
+  .ml-3 {
+    margin-left: 1rem;
+  }
+
+  .mb-3 {
+    margin-bottom: 1rem;
+  }
   
   .tablero-fila:after {
     clear: both;
@@ -55,5 +63,9 @@ body {
   
   .juego-info {
     margin-left: 20px;
+  }
+
+  .celdaGanadora {
+    background-color: #00d8ff;
   }
   
